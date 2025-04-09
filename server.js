@@ -19,7 +19,7 @@ const config = {
     encrypt: true,
     trustServerCertificate: false,
   },
-};
+
   pool: {
     max: 10,
     min: 0,
