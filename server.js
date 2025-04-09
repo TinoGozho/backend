@@ -11,14 +11,15 @@ app.use(express.static('public'));
 
 // Azure SQL config
 const config = {
-  user: 'sdProjAdmin',
-  password: 'Distinction123',
-  server: 'sports-facility-server-sdproj.database.windows.net',
-  database: 'SportsFacilityDB',
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  server: process.env.DB_SERVER,
+  database: process.env.DB_NAME,
   options: {
     encrypt: true,
-    trustServerCertificate: false
+    trustServerCertificate: false,
   },
+};
   pool: {
     max: 10,
     min: 0,
