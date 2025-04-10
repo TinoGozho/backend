@@ -24,7 +24,7 @@ const port = 3000;
 // Middleware to parse JSON bodies
 app.use(express.json());
 const cors = require('cors');
-app.use(cors({ origin: 'https://yourusername.github.io' }));
+app.use(cors({ origin: 'https://tinogozho.github.io/frontend/' }));
 
 // POST endpoint to add/update a user document in Firestore
 app.post('/users', async (req, res) => {
