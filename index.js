@@ -34,9 +34,10 @@ app.use((req, res, next) => {
 // Add all origins you expect (both your deployed front-end and local testing).
 app.use(
   cors({
-    origin: ['https://tinogozho.github.io/frontend/', 'http://localhost:8000']
+    origin: ['https://tinogozho.github.io', 'http://localhost:8000']
   })
 );
+
 app.get('/users/:uid', async (req, res) => {
   try {
     const uid = req.params.uid;
