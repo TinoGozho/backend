@@ -37,37 +37,70 @@ app.use(
     origin: ['https://tinogozho.github.io/frontend/', 'http://localhost:8000']
   })
 );
+app.get('/users/:uid', async (req, res) => {
+  try {
+    const uid = req.params.uid;
+    const userDoc = await db.collection('users').doc(uid).get();
+
+    if (!userDoc.exists) {
+      // User not found – advise them to sign up.
+      return res.status(404).json({ error: 'User not found, please sign up first.' });
+    }
+
+    // Return the user's data (for now, just the first name).
+    const userData = userDoc.data();
+    res.json({ 
+      success: true, 
+      first_name: userData.first_name, 
+      role: userData.role 
+    });
+    
+  } catch (error) {
+    console.error('Error fetching user document:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 // POST endpoint to add/update a user document in Firestore.
+// index.js (backend)
 app.post('/users', async (req, res) => {
   try {
-    const { uid, role } = req.body;
+    const { uid, role, first_name, last_name } = req.body;
 
     if (!uid || !role) {
       return res.status(400).json({ error: 'Missing uid or role' });
     }
 
-    // Use uid as the document ID in the "Users" collection.
-    await db
-      .collection('Users')
-      .doc(uid)
-      .set(
-        {
-          role: role,
-          status: 'active' // or any default status you need
-        },
-        { merge: true }
-      );
+    const userRef = db.collection('users').doc(uid);
+    const userDoc = await userRef.get();
 
-    console.log(`User document for ${uid} saved/updated successfully.`);
-    res.json({ success: true });
+    if (userDoc.exists) {
+      // User already exists
+      return res.status(400).json({ error: 'User already exists. Please log in instead.' });
+    }
+
+    // Create new user
+    await userRef.set({
+      role,
+      first_name,
+      last_name,
+      status: 'pending'
+    });
+
+    console.log(`User document for ${uid} created successfully.`);
+
+    res.json({ success: true, first_name, role });
+
   } catch (error) {
-    // Log the error so you can review it on Render's logs.
     console.error('Error writing document: ', error);
     res.status(500).json({ error: error.message });
   }
 });
 
+
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+
