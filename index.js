@@ -37,7 +37,7 @@ app.use((req, res, next) => {
 // Add all origins you expect (both your deployed front-end and local testing).
 app.use(
   cors({
-  origin: ['https://tinogozho.github.io', 'http://localhost:8000', 'https://pixelbub.github.io']
+  origin: ['https://tinogozho.github.io', 'http://localhost:8000', 'https://pixelbub.github.io', 'https://victorious-bush-007efa41e.6.azurestaticapps.net']
 })
 
 );
