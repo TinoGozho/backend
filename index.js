@@ -1,10 +1,12 @@
+
 // index.js
 const express = require('express');
-const admin = require('firebase-admin');
 const cors = require('cors');
+const path = require('path');
 
-// Initialize Firebase Admin using your service account JSON.
-// Make sure the file path is correct and that the file is deployed along with your app.
+const admin = require("firebase-admin");
+
+
 admin.initializeApp({
   credential: admin.credential.cert({
     "project_id": "sd-project-c2b6c",
@@ -13,7 +15,7 @@ admin.initializeApp({
     "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDArk29vc/dZMDN\nLqGkxfqdz3z22ZI1bIMYtbuAlaY0eWZykYmSc5oBK0Dy2se/5nnUGqECTJXFzN3F\nrmxqo1kpwVG1rRbE6Kx9o7V0TgBOl0u0EJ0vwTF7wubEvH3SVFLfUd2LPg0O1k2e\nrkPyMHmZQVh9mF3J8CAXD40WtXf2gNiKcfV4ah15guUUxzdDiBwu4c4SL9CufkV0\nTGioMwWPXNE7KhKq9xoJWhjsotiRWcZIXOaZ8h3EUWRWg8Xp3LTGapsIecayHDOp\nc8R+/d3HiroflBp9DILrugl+sJNaiQyRko48e6eHzEv8unf1i5fLYZu215Aj7XqH\nEQRQQTyzAgMBAAECggEAQUyxPx0tbaAgMUlc8c1AzqvLc5Mv2Fgyo7SvW3gcEEuW\nWzyUjaQM7Nl+VO+tY41V+3qc130iAxuXi0++IXPDm4GPUg1bmpcqIhhRvh1TQE9J\nEjjRNKZ6QTG/6Kvizl3Siimh9fctELqzKpRvpYwlIbnCJip1mqL9FSOpkqkkg073\naAq/bU53IIdJJMdD05q9aWf3S228tOrLmCHM1rTv4mUJEKluP/7ADzWkJtbqHkqc\noWCqppP5+5bp5KxirkLe4n16EKP2eVULKxiSSKtz2O530GziOezSRWwtebOvbj+B\nJ1wreVsbQH8HMINgMUUelk6LGvxb6qEe3aawBPe0qQKBgQDuhb7bM3m4D7xiq6Eg\n6l0Uo9gGpAKxxY0Mgm0caE5VHqR2QHd9sh6qgAWqEDCcrup7YBD1kUqYWtjCQQRN\nJ0QdCrDDmUn0Y8owYT0SiZnpOl0gW9IZvR/3eqhAOlPRyCAUCz1GlXGLdCpBSnQx\n++rtodpJmmEFpuYGV9+yQdluewKBgQDOzKb7uXx6p+P2W0orIZ+F+4dEVAR3eXws\nypkt5UQuhqquHtIDuh1g2M+0wWfAXmC2iET6veCh1aUJnbFRZCCyXay64Ioq2Ivy\n2xZ1RV4Aef6+ijSxAjulWvIdG/BCdovm1ut0gYVrkiVQ4NJjRFeBKjCZevc+B8A2\nETIHBQsxKQKBgQDOtaH9ndKyrRB6AnuVZwZbyNKCjsi2/5mJac7de5fHNNMamCv2\nBtOEt4YxJ+65Gu2jFlIcP1oCR1jqoCX2Jz1kXctq+AGbho/G9b5TvmRgN3BVhr3C\nCKEXfHkrkGDrwR/rvwHPldvdG0Mzai7g0o16e3YNq3jByS43+ReoCGFC2QKBgQCp\nZDU7aDowdilieHCOV+JFazznmTJ3cslmHyXN1Eg/HAveyFwatW6vD6lDVFDZ3/S0\nT3bBNJs1tLyU3diK5MtrjxOXl6lVYz9vVEpXENTo6wThqm9ytnOJBK/hbCsnJdd+\n5HjFW/qfnHx4fU+YBDjxEk/wyCqRYuPs5bTmzxjV0QKBgQCx4GKU2gRoV//49d8P\nwL3wBGu6NxMYq9/ZBeU/Jc/EMjgXPwudSubhSqah9cr+sQimwbagP0i98ZbiE+tw\nF4K4uRVeHNiz6KbZFjBzn6dFf/OciutLFexoBvBXRQry2OXB7gfVc5CGa7UE1Yuk\nrTnYUvLNi+zRh1qMtbosNBoxIg==\n-----END PRIVATE KEY-----\n",
   })
 });
-// PATCH endpoint to update user status
+
 
 
 
@@ -26,6 +28,10 @@ const port = process.env.PORT || 3000;
 
 // Middleware to parse JSON bodies
 app.use(express.json());
+
+
+// 👉 Serve static files from the project root (one level up from /backend)
+//app.use(express.static(path.join(__dirname, '..')));
 
 // Optional: Set COOP header to avoid some popup warnings.
 // NOTE: Adjust this only if it fits your security model.
@@ -69,6 +75,28 @@ app.get('/facilities', async (req, res) => {
   } catch (err) {
     console.error('Error fetching facilities:', err);
     res.status(500).json({ error: 'Failed to fetch facilities.' });
+  }
+});
+
+app.get('/api/hello', (req, res) => {
+  res.json({ message: 'Hello from backend!' });
+});
+
+app.get('/api/test-db', async (req, res) => {
+  try {
+    const snapshot = await db.collection('Events').limit(1).get();
+    
+    if (snapshot.empty) {
+      return res.json({ message: 'No documents found' });
+    }
+
+    const data = [];
+    snapshot.forEach(doc => data.push({ id: doc.id, ...doc.data() }));
+
+    res.json(data);
+  } catch (err) {
+    console.error('Firebase Error:', err);
+    res.status(500).json({ error: 'Failed to fetch from Firebase' });
   }
 });
 
@@ -265,8 +293,6 @@ app.post('/bookings', async (req, res) => {
 
 
 // LIST bookings (resident or admin)
-// Update your GET /bookings endpoint
-// Update your GET /bookings endpoint
 app.get('/bookings', async (req, res) => {
   try {
     const snapshot = await db.collection('Booking')
@@ -566,7 +592,7 @@ app.patch('/reports/:id', async (req, res) => {
 // POST /events
 // POST /events
 app.post('/events', async (req, res) => {
-  const { facility_id, start_time, end_time, title, description, all_day } = req.body;
+  const { facility_id, start_time, end_time, title, description, all_day, private } = req.body;
   if (!facility_id || !title || description == null)
     return res.status(400).json({ error: 'Missing fields' });
 
@@ -589,7 +615,7 @@ app.post('/events', async (req, res) => {
 
   const now = admin.firestore.FieldValue.serverTimestamp();
   const eRef = db.collection('Events').doc();
-  await eRef.set({ facility_id, title, description, all_day, start_time: startTs, end_time: endTs, created_at: now });
+  await eRef.set({ facility_id, title, description, all_day,private, start_time: startTs, end_time: endTs, created_at: now });
 
   // Notify all users
   const users = await db.collection('users').get();
@@ -643,6 +669,233 @@ app.post('/closures', async (req, res) => {
 
   res.json({ success: true, closureId: cRef.id });
 });
+
+// GET /closures
+app.get('/closures', async (req, res) => {
+  try {
+    const { facilityId, month } = req.query;
+    if (!facilityId || !month) {
+      return res.status(400).json({ error: 'Missing facilityId or month parameter' });
+    }
+
+    // Parse month ("2025-05") → year=2025, month=5
+    const [yearStr, monthStr] = month.split('-');
+    const year  = parseInt(yearStr, 10);
+    const mon   = parseInt(monthStr, 10);
+    if (isNaN(year) || isNaN(mon) || mon < 1 || mon > 12) {
+      return res.status(400).json({ error: 'Invalid month format. Use YYYY-MM.' });
+    }
+
+    // Compute the start & end of that month
+    const monthStart = new Date(Date.UTC(year, mon - 1, 1, 0, 0, 0));
+    const monthEnd   = new Date(Date.UTC(year, mon    , 0, 23, 59, 59, 999));
+
+    const startTs = admin.firestore.Timestamp.fromDate(monthStart);
+    const endTs   = admin.firestore.Timestamp.fromDate(monthEnd);
+
+    // Query closures overlapping this month
+    const snap = await db.collection('Closure')
+      .where('facility_id', '==', facilityId)
+      .where('start_time', '<', endTs)
+      .where('end_time',   '>', startTs)
+      .get();
+
+    const closures = snap.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id:         doc.id,
+        facilityId: data.facility_id,
+        reason:     data.reason,
+        all_day:    data.all_day,
+        // convert Firestore Timestamps to ISO strings
+        start_time: data.start_time.toDate().toISOString(),
+        end_time:   data.end_time.toDate().toISOString(),
+      };
+    });
+
+    return res.json(closures);
+
+  } catch (err) {
+    console.error('Error fetching closures:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+app.get('/events/upcoming', async (req, res) => {
+  const user_uid = req.query.user_uid;
+
+  try {
+    const nowTs = admin.firestore.Timestamp.fromDate(new Date());
+    const snapshot = await db.collection('Events')
+      .where('start_time', '>', nowTs)
+      .where('private', '!=', true)
+      .orderBy('start_time')
+      .get();
+
+    const events = await Promise.all(snapshot.docs.map(async (doc) => {
+      const d = doc.data();
+      let isRSVPed = false;
+
+      if (user_uid) {
+        const rsvpDoc = await db
+          .collection('users')
+          .doc(user_uid)
+          .collection('RSVP')
+          .doc(doc.id)
+          .get();
+        isRSVPed = rsvpDoc.exists;
+      }
+
+      return {
+        id: doc.id,
+        title: d.title,
+        description: d.description || '',
+        facilityId: d.facility_id,
+        startTime: d.start_time.toDate().toISOString(),
+        endTime: d.end_time.toDate().toISOString(),
+        private: d.private || false,
+        imageUrl: d.image_url || null,
+        attendance: d.attendance || 0,
+        isRSVPed
+      };
+    }));
+
+    res.json(events);
+  } catch (err) {
+    console.error('Error fetching upcoming events:', err);
+    res.status(500).json({ error: 'Failed to fetch events' });
+  }
+});
+// GET /users/:user_uid/rsvps
+app.get('/users/:user_uid/rsvps', async (req, res) => {
+  const { user_uid } = req.params;
+  if (!user_uid) return res.status(400).json({ error: 'Missing user_uid' });
+
+  try {
+    const snap = await db
+      .collection('users')
+      .doc(user_uid)
+      .collection('RSVP')
+      .get();
+
+    const rsvps = snap.docs.map(doc => ({
+      event_id:    doc.id,
+      count:       doc.data().count || 1,
+      created_at:  doc.data().created_at?.toDate().toISOString(),
+      event_title: doc.data().event_title,
+      event_start: doc.data().event_start?.toDate().toISOString()
+    }));
+
+    res.json(rsvps);
+  } catch (err) {
+    console.error('Error fetching user RSVPs:', err);
+    res.status(500).json({ error: 'Failed to fetch RSVPs' });
+  }
+});
+
+// GET /admin/events/attendance
+app.get('/admin/events/attendance', async (req, res) => {
+  try {
+    const snapshot = await db
+      .collection('Events')
+      .where('private', '!=', true) // Exclude private events
+      .orderBy('private') // Firestore requires ordering on the same field when using '!='
+      .orderBy('start_time')
+      .get();
+
+    const data = snapshot.docs.map(doc => {
+      const d = doc.data();
+      return {
+        id: doc.id,
+        title: d.title || 'Untitled',
+        attendance: d.attendance || 0,
+        start_time: d.start_time.toDate().toISOString()
+      };
+    });
+
+    res.json(data);
+  } catch (err) {
+    console.error('Error fetching event stats:', err);
+    res.status(500).json({ error: 'Failed to fetch attendance stats' });
+  }
+});
+
+
+
+
+app.post('/events/:id/rsvp', async (req, res) => {
+  const eventId = req.params.id;
+  const { user_uid, count } = req.body;
+
+  if (!user_uid || !count) return res.status(400).json({ error: 'Missing user_uid or count' });
+
+  const eventRef = db.collection('Events').doc(eventId);
+  const rsvpRef = db.collection('users').doc(user_uid).collection('RSVP').doc(eventId);
+
+  try {
+    const rsvpDoc = await rsvpRef.get();
+    if (rsvpDoc.exists) {
+      return res.status(400).json({ error: 'Already RSVPed to this event' });
+    }
+
+    await db.runTransaction(async (t) => {
+      const eventDoc = await t.get(eventRef);
+      if (!eventDoc.exists) throw new Error('Event not found');
+
+      const attendance = eventDoc.data().attendance || 0;
+      t.update(eventRef, { attendance: attendance + count });
+
+      t.set(rsvpRef, {
+        event_id: eventId,
+        event_title: eventDoc.data().title || '',
+        event_start: eventDoc.data().start_time,
+        count,
+        created_at: admin.firestore.FieldValue.serverTimestamp()
+      });
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('RSVP failed:', err);
+    res.status(500).json({ error: 'RSVP failed', detail: err.message });
+  }
+});
+
+
+app.delete('/events/:id/rsvp', async (req, res) => {
+  const eventId = req.params.id;
+  const { user_uid } = req.body;
+
+  if (!user_uid) return res.status(400).json({ error: 'Missing user_uid' });
+
+  const eventRef = db.collection('Events').doc(eventId);
+  const rsvpRef = db.collection('users').doc(user_uid).collection('RSVP').doc(eventId);
+
+  try {
+    const rsvpDoc = await rsvpRef.get();
+    if (!rsvpDoc.exists) return res.status(400).json({ error: 'No RSVP found' });
+
+    const count = rsvpDoc.data().count || 1;
+
+    await db.runTransaction(async (t) => {
+      const eventDoc = await t.get(eventRef);
+      if (!eventDoc.exists) throw new Error('Event not found');
+
+      const attendance = eventDoc.data().attendance || 0;
+      t.update(eventRef, { attendance: Math.max(0, attendance - count) });
+
+      t.delete(rsvpRef);
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Cancel RSVP failed:', err);
+    res.status(500).json({ error: 'Cancel RSVP failed', detail: err.message });
+  }
+});
+
+
+
+
 
 // server.js or notifications.js (depending on how you're structured)
 app.get('/notifications/unread/:userUid', async (req, res) => {
