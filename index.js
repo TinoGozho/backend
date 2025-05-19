@@ -421,13 +421,11 @@ app.get('/availability', async (req, res) => {
 
 
 // ADMIN: Approve or block a booking
-// Update your booking status endpoint in index.js
-// In your index.js, verify this endpoint exists:
 app.patch('/bookings/:id/status', async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
-    
+
     if (!id) return res.status(400).json({ error: 'Missing booking ID' });
     if (!['approved', 'blocked'].includes(status)) {
       return res.status(400).json({ error: 'Invalid status' });
@@ -440,7 +438,27 @@ app.patch('/bookings/:id/status', async (req, res) => {
       return res.status(404).json({ error: 'Booking not found' });
     }
 
+    const bookingData = bookingDoc.data();
+    const userId = bookingData.user_uid;
+
+    if (!userId) {
+      return res.status(400).json({ error: 'Booking does not have a user_id field' });
+    }
+
     await bookingRef.update({ status });
+
+    const now = admin.firestore.FieldValue.serverTimestamp();
+    const message = `Your booking has been ${status}.`;
+    const nRef = db.collection('users').doc(userId).collection('Notification').doc();
+
+    await nRef.set({
+      user_uid: userId,
+      type: 'booking_status',
+      message,
+      read: false,
+      created_at: now
+    });
+
     res.json({ success: true, message: `Booking ${id} updated to ${status}` });
 
   } catch (err) {
@@ -448,6 +466,7 @@ app.patch('/bookings/:id/status', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 // POST /reports - create a new report
 app.post('/reports', async (req, res) => {
