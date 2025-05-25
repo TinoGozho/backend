@@ -320,21 +320,29 @@ app.get('/bookings', async (req, res) => {
 // LIST bookings (resident or admin)
 app.get('/allbookings', async (req, res) => {
   try {
-    const snapshot = await db.collection('Booking')
-      .get();
-    
+    console.log('Fetching all bookings...');
+    const snapshot = await db.collection('Booking').get();
+
     const bookings = snapshot.docs.map(doc => {
       const data = doc.data();
+      console.log('Booking data:', data); // ← DEBUG HERE
+
       return {
         id: doc.id,
         facilityId: data.facility_id,
         status: data.status,
         user_uid: data.user_uid,
-        // Convert Firestore timestamps to ISO strings
-        startTime: data.start_time.toDate().toISOString(),
-        endTime: data.end_time.toDate().toISOString()
+        startTime: data.start_time?.toDate().toISOString(),  // ← might throw if undefined
+        endTime: data.end_time?.toDate().toISOString()
       };
     });
+
+    res.json(bookings);
+  } catch (err) {
+    console.error('🔥 Error in /allbookings:', err);  // LOG the actual error
+    res.status(500).json({ error: err.message });
+  }
+});
     
     res.json(bookings);
   } catch (err) {
