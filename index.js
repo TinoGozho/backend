@@ -292,13 +292,23 @@ app.post('/bookings', async (req, res) => {
 
 
 
-// LIST bookings (resident or admin)
+// LIST bookings (admin or resident) — filter by status or upcoming
 app.get('/bookings', async (req, res) => {
   try {
-    const snapshot = await db.collection('Booking')
-      .where('status', '==', req.query.status)
-      .get();
-    
+    let query = db.collection('Booking');
+
+    const { status, upcoming } = req.query;
+
+    if (status) {
+      query = query.where('status', '==', status);
+    }
+
+    if (upcoming === 'true') {
+      query = query.where('start_time', '>', new Date());
+    }
+
+    const snapshot = await query.get();
+
     const bookings = snapshot.docs.map(doc => {
       const data = doc.data();
       return {
@@ -306,17 +316,17 @@ app.get('/bookings', async (req, res) => {
         facilityId: data.facility_id,
         status: data.status,
         user_uid: data.user_uid,
-        // Convert Firestore timestamps to ISO strings
         startTime: data.start_time.toDate().toISOString(),
         endTime: data.end_time.toDate().toISOString()
       };
     });
-    
+
     res.json(bookings);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 
 // Add new endpoint to check availability
