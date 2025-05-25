@@ -317,6 +317,30 @@ app.get('/bookings', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+// LIST bookings (resident or admin)
+app.get('/allbookings', async (req, res) => {
+  try {
+    const snapshot = await db.collection('Booking')
+      .get();
+    
+    const bookings = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        facilityId: data.facility_id,
+        status: data.status,
+        user_uid: data.user_uid,
+        // Convert Firestore timestamps to ISO strings
+        startTime: data.start_time.toDate().toISOString(),
+        endTime: data.end_time.toDate().toISOString()
+      };
+    });
+    
+    res.json(bookings);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 
 // Add new endpoint to check availability
