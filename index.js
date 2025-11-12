@@ -24,7 +24,7 @@ const db = admin.firestore();
 
 const app = express();
 // Use the dynamic port provided by Render, falling back to 3000 if needed.
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3000  || 5173;
 
 // Middleware to parse JSON bodies
 app.use(express.json());
@@ -1022,3 +1022,4 @@ app.get('/notifications/:uid', async (req, res) => {
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+
