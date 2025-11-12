@@ -44,7 +44,7 @@ app.use((req, res, next) => {
 // Add all origins you expect (both your deployed front-end and local testing).
 app.use(
   cors({
-    origin: ['https://tinogozho.github.io', 'http://localhost:8000' , 'https://pixelbub.github.io', 'https://victorious-bush-007efa41e.6.azurestaticapps.net', 'http://localhost:3000']
+    origin: ['https://tinogozho.github.io', 'http://localhost:8000' , 'https://pixelbub.github.io', 'https://victorious-bush-007efa41e.6.azurestaticapps.net', 'http://localhost:3000','http://localhost:5173']
   })
 );
 // GET all users
@@ -1022,4 +1022,5 @@ app.get('/notifications/:uid', async (req, res) => {
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+
 
